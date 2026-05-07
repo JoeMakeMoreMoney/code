@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+  <title>JSON Formator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1E1E1E;
+      color: #D4D4D4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 16px;
+      background: #252526;
+      border-bottom: 1px solid #3C3C3C;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: #0078D4;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .file-section {
+      padding: 16px;
+      background: #252526;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .file-input {
+      flex: 1;
+      background: #3C3C3C;
+      border: 1px solid #3C3C3C;
+      border-radius: 4px;
+      padding: 10px 12px;
+      color: #D4D4D4;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 150ms ease;
+    }
+
+    .file-input:focus {
+      border-color: #0078D4;
+    }
+
+    .file-input::placeholder {
+      color: #808080;
+    }
+
+    .btn {
+      background: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: filter 150ms ease;
+    }
+
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn:active {
+      filter: brightness(0.95);
+    }
+
+    .btn-secondary {
+      background: #3C3C3C;
+    }
+
+    .actions {
+      padding: 16px;
+      background: #252526;
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #3C3C3C;
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    .line-numbers {
+      background: #1E1E1E;
+      color: #5A5A5A;
+      padding: 12px 12px;
+      text-align: right;
+      font-family: "SF Mono", "Monaco", "Menlo", monospace;
+      font-size: 14px;
+      line-height: 21px;
+      user-select: none;
+      width: 60px;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: block;
+    }
+
+    .line-numbers::-webkit-scrollbar {
+      display: none;
+    }
+
+    .editor-wrapper {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #editor {
+      width: 100%;
+      height: 100%;
+      background: #1E1E1E;
+      color: #D4D4D4;
+      border: none;
+      padding: 12px;
+      font-family: "SF Mono", "Monaco", "Menlo", monospace;
+      font-size: 14px;
+      line-height: 21px;
+      resize: none;
+      outline: none;
+      overflow: auto;
+      white-space: pre;
+      word-wrap: normal;
+      position: relative;
+      z-index: 2;
+    }
+
+    .error-highlight {
+      position: absolute;
+      left: 0;
+      right: 0;
+      background: rgba(244, 67, 54, 0.2);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .error-highlight.active {
+      z-index: 3;
+    }
+
+    #editor::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    #editor::-webkit-scrollbar-track {
+      background: #1E1E1E;
+    }
+
+    #editor::-webkit-scrollbar-thumb {
+      background: #3C3C3C;
+      border-radius: 5px;
+    }
+
+    #editor::-webkit-scrollbar-thumb:hover {
+      background: #5A5A5A;
+    }
+
+    #editor::placeholder {
+      color: #808080;
+    }
+
+    .error-panel {
+      background: #252526;
+      border-top: 1px solid #3C3C3C;
+      padding: 12px 16px;
+      max-height: 120px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .error-panel.visible {
+      display: block;
+    }
+
+    .error-panel.error {
+      border-left: 3px solid #F44336;
+    }
+
+    .error-panel.success {
+      border-left: 3px solid #4CAF50;
+    }
+
+    .error-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .error-title.error {
+      color: #F44336;
+    }
+
+    .error-title.success {
+      color: #4CAF50;
+    }
+
+    .error-message {
+      font-size: 13px;
+      color: #D4D4D4;
+      line-height: 1.4;
+    }
+
+    .error-location {
+      color: #808080;
+      margin-top: 4px;
+    }
+
+    .error-fix {
+      color: #FF9800;
+      margin-top: 4px;
+    }
+
+    .status-bar {
+      padding: 8px 16px;
+      background: #0078D4;
+      color: white;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #252526;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      padding: 12px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transform: translateX(120%);
+      transition: transform 200ms ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      border-left: 3px solid #4CAF50;
+    }
+
+    .notification.error {
+      border-left: 3px solid #F44336;
+    }
+
+    .highlight-line {
+      background: rgba(244, 67, 54, 0.15);
+      display: block;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .modal-overlay.show {
+      display: block;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #252526;
+      border: 1px solid #3C3C3C;
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 320px;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .modal.success {
+      border-top: 3px solid #4CAF50;
+    }
+
+    .modal.error {
+      border-top: 3px solid #F44336;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .modal-title.success {
+      color: #4CAF50;
+    }
+
+    .modal-title.error {
+      color: #F44336;
+    }
+
+    .modal-message {
+      font-size: 14px;
+      color: #D4D4D4;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .modal .btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: #0078D4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-icon">{}</div>
+    <div class="header-title">JSON 格式化工具</div>
+  </div>
+
+  <div class="file-section">
+    <input type="text" class="file-input" id="filePath" placeholder="输入 JSON 文件路径或点击浏览...">
+    <button class="btn btn-secondary" id="browseBtn">浏览...</button>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="importBtn">导入</button>
+    <button class="btn" id="validateBtn">检查</button>
+    <button class="btn" id="formatBtn">格式化</button>
+    <button class="btn btn-secondary" id="exportBtn">导出</button>
+  </div>
+
+  <div class="editor-container">
+    <div class="line-numbers" id="lineNumbers">1</div>
+    <div class="editor-wrapper">
+      <textarea id="editor" placeholder="JSON 内容将显示在这里..."></textarea>
+      <div class="error-highlight" id="errorHighlight"></div>
+    </div>
+  </div>
+
+  <div class="error-panel" id="errorPanel">
+    <div class="error-title" id="errorTitle"></div>
+    <div class="error-message" id="errorMessage"></div>
+    <div class="error-location" id="errorLocation"></div>
+    <div class="error-fix" id="errorFix"></div>
+  </div>
+
+  <div class="status-bar">
+    <span id="statusText">就绪</span>
+    <span id="cursorPosition">行 1, 列 1</span>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal" id="modal">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-message" id="modalMessage"></div>
+    <button class="btn" id="modalOkBtn">确定</button>
+  </div>
+
+  <script>
+    const filePathInput = document.getElementById('filePath');
+    const browseBtn = document.getElementById('browseBtn');
+    const importBtn = document.getElementById('importBtn');
+    const validateBtn = document.getElementById('validateBtn');
+    const formatBtn = document.getElementById('formatBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const editor = document.getElementById('editor');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const errorPanel = document.getElementById('errorPanel');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorLocation = document.getElementById('errorLocation');
+    const errorFix = document.getElementById('errorFix');
+    const statusText = document.getElementById('statusText');
+    const cursorPosition = document.getElementById('cursorPosition');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalOkBtn = document.getElementById('modalOkBtn');
+
+    let currentFilePath = null;
+
+    function showModal(type, title, message) {
+      modal.className = 'modal show ' + type;
+      modalTitle.className = 'modal-title ' + type;
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      modalOverlay.classList.add('show');
+    }
+
+    function hideModal() {
+      modal.className = 'modal';
+      modalOverlay.classList.remove('show');
+    }
+
+    modalOkBtn.addEventListener('click', hideModal);
+    modalOverlay.addEventListener('click', hideModal);
+
+    browseBtn.addEventListener('click', async () => {
+      const path = await window.electronAPI.openFileDialog();
+      if (path) {
+        filePathInput.value = path;
+        currentFilePath = path;
+      }
+    });
+
+    importBtn.addEventListener('click', async () => {
+      const path = filePathInput.value.trim();
+      if (!path) {
+        showModal('error', '未选择文件', '请输入或选择 JSON 文件路径');
+        return;
+      }
+
+      const result = await window.electronAPI.readFile(path);
+      if (result.success) {
+        editor.value = result.content;
+        currentFilePath = path;
+        updateLineNumbers();
+        hideErrorPanel();
+        clearErrorHighlight();
+        showModal('success', '导入成功', 'JSON 文件已成功加载');
+        statusText.textContent = '文件已导入';
+      } else {
+        showModal('error', '导入失败', result.error);
+      }
+    });
+
+    validateBtn.addEventListener('click', () => {
+      const content = editor.value;
+      if (!content.trim()) {
+        showModal('error', '内容为空', '请先导入或粘贴 JSON 内容');
+        return;
+      }
+
+      try {
+        JSON.parse(content);
+        hideErrorPanel();
+        showModal('success', '验证通过', 'JSON 格式正确，无语法错误');
+        statusText.textContent = 'JSON 格式正确';
+      } catch (e) {
+        const errorInfo = parseJSONError(e.message, content);
+        showError(e.message, errorInfo);
+      }
+    });
+
+    formatBtn.addEventListener('click', () => {
+      const content = editor.value;
+      if (!content.trim()) {
+        showModal('error', '内容为空', '请先导入或粘贴 JSON 内容');
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(content);
+        const formatted = JSON.stringify(parsed, null, 4);
+        editor.value = formatted;
+        updateLineNumbers();
+        hideErrorPanel();
+        showModal('success', '格式化成功', 'JSON 已使用 4 空格缩进格式化');
+        statusText.textContent = 'JSON 已格式化';
+      } catch (e) {
+        const errorInfo = parseJSONError(e.message, content);
+        showError(e.message, errorInfo);
+      }
+    });
+
+    exportBtn.addEventListener('click', async () => {
+      const content = editor.value;
+      if (!content) {
+        showModal('error', '内容为空', '没有内容可导出');
+        return;
+      }
+
+      let savePath = currentFilePath;
+      if (!savePath) {
+        savePath = await window.electronAPI.getHomeDir();
+      }
+
+      const path = await window.electronAPI.saveFileDialog(savePath);
+      if (!path) return;
+
+      const result = await window.electronAPI.writeFile(path, content);
+      if (result.success) {
+        currentFilePath = path;
+        filePathInput.value = path;
+        showModal('success', '导出成功', `JSON 已保存到: ${path}`);
+        statusText.textContent = '文件已保存';
+      } else {
+        showModal('error', '导出失败', result.error);
+      }
+    });
+
+    editor.addEventListener('input', updateLineNumbers);
+
+    editor.addEventListener('scroll', () => {
+      lineNumbers.scrollTop = editor.scrollTop;
+    });
+
+    editor.addEventListener('keyup', updateCursorPosition);
+    editor.addEventListener('click', updateCursorPosition);
+
+    function updateLineNumbers() {
+      const lines = editor.value.split('\n').length;
+      let html = '';
+      for (let i = 1; i <= lines; i++) {
+        html += i + '<br>';
+      }
+      lineNumbers.innerHTML = html;
+    }
+
+    function updateCursorPosition() {
+      const text = editor.value;
+      const selectionStart = editor.selectionStart;
+      const lines = text.substr(0, selectionStart).split('\n');
+      const line = lines.length;
+      const col = lines[lines.length - 1].length + 1;
+      cursorPosition.textContent = `Ln ${line}, Col ${col}`;
+    }
+
+    function parseJSONError(message, content) {
+      const match = message.match(/position (\d+)/);
+      let line = 1;
+      let col = 1;
+      let fix = '';
+
+      if (match) {
+        const position = parseInt(match[1]);
+        const textBeforeError = content.substr(0, position);
+        const lines = textBeforeError.split('\n');
+        line = lines.length;
+        col = lines[lines.length - 1].length + 1;
+      }
+
+      if (message.includes('Unexpected token')) {
+        if (message.includes("'") || message.includes('"')) {
+          fix = 'Check for unmatched quotes (single or double)';
+        } else if (message.includes('}')) {
+          fix = 'Check for extra or missing closing braces';
+        } else if (message.includes(']')) {
+          fix = 'Check for extra or missing closing brackets';
+        } else {
+          fix = 'Check for unexpected characters or missing delimiters';
+        }
+      } else if (message.includes('Unexpected end')) {
+        fix = 'Missing closing brace or bracket';
+      } else if (message.includes('Expected')) {
+        fix = 'Check the data structure - missing comma, bracket, or brace';
+      } else {
+        fix = 'Review JSON syntax';
+      }
+
+      return { line, col, fix };
+    }
+
+    function showError(message, errorInfo) {
+      errorPanel.className = 'error-panel visible error';
+      errorTitle.className = 'error-title error';
+      errorTitle.textContent = 'JSON Syntax Error';
+      errorMessage.textContent = message;
+      errorLocation.textContent = `Line ${errorInfo.line}, Column ${errorInfo.col}`;
+      errorFix.textContent = `建议: ${errorInfo.fix}`;
+      statusText.textContent = 'JSON 有语法错误';
+
+      highlightErrorLine(errorInfo.line);
+      showModal('error', 'JSON 格式错误', `错误位于第 ${errorInfo.line} 行，第 ${errorInfo.col} 列`);
+    }
+
+    function highlightErrorLine(lineNum) {
+      const lines = editor.value.split('\n');
+      if (lineNum < 1 || lineNum > lines.length) return;
+
+      const lineHeight = 21;
+      const scrollTop = editor.scrollTop;
+      const padding = 12;
+      const targetLineTop = padding + (lineNum - 1) * lineHeight;
+
+      const errorHighlight = document.getElementById('errorHighlight');
+      errorHighlight.style.top = targetLineTop + 'px';
+      errorHighlight.style.height = lineHeight + 'px';
+      errorHighlight.classList.add('active');
+
+      if (targetLineTop < scrollTop || targetLineTop > scrollTop + editor.clientHeight - lineHeight) {
+        editor.scrollTop = Math.max(0, targetLineTop - editor.clientHeight / 2);
+      }
+    }
+
+    function clearErrorHighlight() {
+      const errorHighlight = document.getElementById('errorHighlight');
+      errorHighlight.classList.remove('active');
+      errorHighlight.style.top = '0';
+      errorHighlight.style.height = '0';
+    }
+
+    function hideErrorPanel() {
+      errorPanel.className = 'error-panel';
+      clearErrorHighlight();
+    }
+
+    editor.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    editor.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.path && file.name.endsWith('.json')) {
+          filePathInput.value = file.path;
+          currentFilePath = file.path;
+          const result = await window.electronAPI.readFile(file.path);
+          if (result.success) {
+            editor.value = result.content;
+            updateLineNumbers();
+            hideErrorPanel();
+            showModal('success', '导入成功', 'JSON 文件已成功加载');
+          }
+        } else {
+          showModal('error', '无效文件', '请拖放 .json 文件');
+        }
+      }
+    });
+
+    updateLineNumbers();
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "name": "jsonformator",
+  "version": "1.0.0",
+  "description": "A macOS desktop tool for importing, validating, formatting, and exporting JSON files",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder",
+    "build-mac": "electron-builder --mac"
+  },
+  "keywords": [
+    "json",
+    "formatter",
+    "editor",
+    "macos"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^41.5.0",
+    "electron-builder": "^26.8.1",
+    "playwright": "^1.59.1"
+  },
+  "build": {
+    "appId": "com.jsonformator.app",
+    "productName": "JSON Formator",
+    "directories": {
+      "output": "/Users/zouchunduan/code/tools"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "zip"
+      ]
+    },
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**"
+    ]
+  }
+}
