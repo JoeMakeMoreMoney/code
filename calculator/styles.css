@@ -1,0 +1,327 @@
+/* === Reset & Base === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #1e1e1e;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+}
+
+/* === Calculator Container === */
+.calculator {
+    width: 320px;
+    background: #2c2c2c;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* === Tabs === */
+.tabs {
+    display: flex;
+    background: #1c1c1c;
+    padding: 8px 8px 0;
+    gap: 2px;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 4px;
+    background: transparent;
+    border: none;
+    color: #8e8e93;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: #ccc;
+}
+
+.tab.active {
+    background: #2c2c2c;
+    color: #fff;
+}
+
+/* === Display === */
+.display {
+    padding: 20px 24px 16px;
+    text-align: right;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.expression {
+    color: #8e8e93;
+    font-size: 16px;
+    min-height: 24px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result {
+    color: #fff;
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: font-size 0.15s;
+}
+
+.result.small {
+    font-size: 32px;
+}
+
+/* === Panels === */
+.panel {
+    display: none;
+}
+
+.panel.active {
+    display: block;
+}
+
+/* === Button Grids === */
+.btn-grid {
+    display: grid;
+    padding: 4px;
+    gap: 4px;
+}
+
+/* Basic: 4 columns, 5 rows */
+.basic-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Scientific: 5 columns */
+.scientific-grid {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* Programmer: 4 columns */
+.programmer-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* === Buttons === */
+.btn {
+    height: 52px;
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.1s;
+    font-family: inherit;
+}
+
+.btn:active {
+    transform: scale(0.95);
+    filter: brightness(1.2);
+}
+
+/* Number buttons */
+.btn.number {
+    background: #505050;
+    color: #fff;
+}
+
+.btn.number:hover {
+    background: #606060;
+}
+
+/* Operator buttons */
+.btn.operator {
+    background: #ff9f0a;
+    color: #fff;
+    font-size: 24px;
+}
+
+.btn.operator:hover {
+    background: #ffb340;
+}
+
+.btn.operator.active-op {
+    background: #fff;
+    color: #ff9f0a;
+}
+
+/* Function buttons */
+.btn.func {
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 16px;
+}
+
+.btn.func:hover {
+    background: #4a4a4a;
+}
+
+/* Equals button */
+.btn.equals {
+    background: #ff9f0a;
+    color: #fff;
+    font-size: 24px;
+}
+
+.btn.equals:hover {
+    background: #ffb340;
+}
+
+/* Zero button spans 1 column in basic */
+.btn.zero {
+    /* same width, handled by grid */
+}
+
+/* Scientific buttons */
+.btn.sci {
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 14px;
+}
+
+.btn.sci:hover {
+    background: #4a4a4a;
+}
+
+/* Programmer display */
+.programmer-display {
+    padding: 16px 24px;
+    background: #1c1c1c;
+}
+
+.radix-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.radix-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    padding: 1px 0;
+}
+
+.radix-line.active-radix {
+    color: #fff;
+    font-size: 14px;
+}
+
+.radix-label {
+    font-weight: 600;
+    min-width: 32px;
+}
+
+.radix-value {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bit-display {
+    margin-top: 8px;
+    display: flex;
+    gap: 1px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+.bit {
+    display: inline-block;
+    width: 14px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    border-radius: 2px;
+}
+
+.bit.on {
+    color: #ff9f0a;
+    background: rgba(255, 159, 10, 0.15);
+}
+
+.bit-space {
+    width: 8px;
+}
+
+/* Programmer buttons */
+.btn.prog {
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 13px;
+}
+
+.btn.prog:hover {
+    background: #4a4a4a;
+}
+
+.btn.radix-btn {
+    background: transparent;
+    color: #8e8e93;
+    font-size: 12px;
+    height: 32px;
+}
+
+.btn.radix-btn.active-radix {
+    color: #ff9f0a;
+}
+
+.btn.radix-btn:hover {
+    color: #ccc;
+}
+
+/* Hex keys hidden by default */
+.btn.hex-key {
+    display: none;
+}
+
+/* Show hex keys in HEX mode */
+.programmer-grid.hex-mode .btn.hex-key {
+    display: block;
+}
+
+/* Hide decimal in non-DEC mode */
+.programmer-grid.int-mode .btn[data-action="decimal"] {
+    visibility: hidden;
+}
+
+/* Hide A-F keys in non-HEX mode */
+.programmer-grid:not(.hex-mode) .btn.hex-key {
+    display: none;
+}
+
+/* === Responsive === */
+@media (max-width: 360px) {
+    .calculator {
+        width: 100vw;
+        border-radius: 0;
+    }
+
+    .btn {
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .result {
+        font-size: 40px;
+    }
+}
